@@ -4,6 +4,8 @@ import com.example.foodorder.order.delegate.ResponseCoordinator;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.camunda.bpm.engine.RuntimeService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
@@ -13,6 +15,8 @@ import java.util.Map;
 
 @Component
 public class ActiveMQResponseListener {
+
+    private static final Logger log = LoggerFactory.getLogger(ActiveMQResponseListener.class);
 
     @Autowired
     private RuntimeService runtimeService;
@@ -37,8 +41,7 @@ public class ActiveMQResponseListener {
             // Start the Camunda process workflow
             runtimeService.startProcessInstanceByKey("food-order-process", variables);
         } catch (Exception e) {
-            System.err.println("Error processing order.created message: " + e.getMessage());
-            e.printStackTrace();
+            log.error("Error processing order.created message", e);
         }
     }
 
@@ -54,8 +57,7 @@ public class ActiveMQResponseListener {
 
             responseCoordinator.resolve(correlationId, status);
         } catch (Exception e) {
-            System.err.println("Error processing payment.response: " + e.getMessage());
-            e.printStackTrace();
+            log.error("Error processing payment.response", e);
         }
     }
 
@@ -71,8 +73,7 @@ public class ActiveMQResponseListener {
 
             responseCoordinator.resolve(correlationId, status);
         } catch (Exception e) {
-            System.err.println("Error processing kitchen.response: " + e.getMessage());
-            e.printStackTrace();
+            log.error("Error processing kitchen.response", e);
         }
     }
 
@@ -88,8 +89,7 @@ public class ActiveMQResponseListener {
 
             responseCoordinator.resolve(correlationId, driverName);
         } catch (Exception e) {
-            System.err.println("Error processing delivery.response: " + e.getMessage());
-            e.printStackTrace();
+            log.error("Error processing delivery.response", e);
         }
     }
 }

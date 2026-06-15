@@ -4,6 +4,8 @@ import com.example.foodorder.kitchen.model.KitchenTicket;
 import com.example.foodorder.kitchen.repository.KitchenTicketRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.core.JmsTemplate;
@@ -11,6 +13,8 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class KitchenListener {
+
+    private static final Logger log = LoggerFactory.getLogger(KitchenListener.class);
 
     @Autowired
     private KitchenTicketRepository kitchenTicketRepository;
@@ -39,7 +43,7 @@ public class KitchenListener {
             kitchenTicketRepository.save(ticket);
 
             // 4. Log required console log: [KitchenService] Order #123 - Food READY
-            System.out.println("[KitchenService] Order #" + orderId + " - Food READY");
+            log.info("[KitchenService] Order #{} - Food READY", orderId);
 
             // 5. Send back response payload
             String responsePayload = String.format(
@@ -49,8 +53,7 @@ public class KitchenListener {
             jmsTemplate.convertAndSend("kitchen.response", responsePayload);
 
         } catch (Exception e) {
-            System.err.println("Error processing kitchen request: " + e.getMessage());
-            e.printStackTrace();
+            log.error("Error processing kitchen request", e);
         }
     }
 }

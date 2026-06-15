@@ -1,5 +1,7 @@
 package com.example.foodorder.order.delegate;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -15,6 +17,8 @@ import java.util.concurrent.TimeUnit;
  */
 @Component
 public class ResponseCoordinator {
+
+    private static final Logger log = LoggerFactory.getLogger(ResponseCoordinator.class);
 
     private final Map<String, CountDownLatch> latches = new ConcurrentHashMap<>();
     private final Map<String, String> results = new ConcurrentHashMap<>();
@@ -51,7 +55,7 @@ public class ResponseCoordinator {
             results.put(correlationId, result);
             latch.countDown();
         } else {
-            System.err.println("Warning: No latch found for correlationId: " + correlationId);
+            log.warn("No latch found for correlationId={}", correlationId);
         }
     }
 }

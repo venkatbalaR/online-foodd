@@ -1,14 +1,19 @@
 package com.example.foodorder.order;
 
 import org.apache.activemq.broker.BrokerService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.jms.annotation.EnableJms;
 
 @SpringBootApplication
 @EnableJms
 public class OrderServiceApplication {
+
+    private static final Logger log = LoggerFactory.getLogger(OrderServiceApplication.class);
 
     public static void main(String[] args) {
         SpringApplication.run(OrderServiceApplication.class, args);
@@ -19,6 +24,7 @@ public class OrderServiceApplication {
      * This allows all microservices to use the standard tcp://localhost:61616 url.
      */
     @Bean(destroyMethod = "stop")
+    @ConditionalOnProperty(name = "app.activemq.embedded", havingValue = "true", matchIfMissing = true)
     public BrokerService activemqBroker() throws Exception {
         BrokerService broker = new BrokerService();
         broker.setBrokerName("online-food-mq");
@@ -26,7 +32,7 @@ public class OrderServiceApplication {
         broker.setPersistent(false);
         broker.setUseJmx(false);
         broker.start();
-        System.out.println("ActiveMQ Embedded Broker started on tcp://localhost:61616");
+        log.info("ActiveMQ Embedded Broker started on tcp://localhost:61616");
         return broker;
     }
 }

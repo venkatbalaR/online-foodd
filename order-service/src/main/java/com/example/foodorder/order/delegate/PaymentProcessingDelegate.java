@@ -4,6 +4,8 @@ import com.example.foodorder.order.model.Order;
 import com.example.foodorder.order.repository.OrderRepository;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
@@ -19,6 +21,8 @@ import java.math.BigDecimal;
 @Component("paymentProcessingDelegate")
 public class PaymentProcessingDelegate implements JavaDelegate {
 
+    private static final Logger log = LoggerFactory.getLogger(PaymentProcessingDelegate.class);
+
     @Autowired
     private JmsTemplate jmsTemplate;
 
@@ -33,7 +37,7 @@ public class PaymentProcessingDelegate implements JavaDelegate {
         Long orderId = (Long) execution.getVariable("orderId");
 
         // Log workflow started: [OrderService] Order #123 - Workflow started
-        System.out.println("[OrderService] Order #" + orderId + " - Workflow started");
+        log.info("[OrderService] Order #{} - Workflow started", orderId);
 
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("Order not found: " + orderId));
@@ -62,6 +66,6 @@ public class PaymentProcessingDelegate implements JavaDelegate {
             orderRepository.save(order);
         }
 
-        System.out.println("[OrderService] Order #" + orderId + " - Payment result: " + status);
+        log.info("[OrderService] Order #{} - Payment result: {}", orderId, status);
     }
 }

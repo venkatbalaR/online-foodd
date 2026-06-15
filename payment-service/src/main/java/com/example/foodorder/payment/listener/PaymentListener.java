@@ -4,6 +4,8 @@ import com.example.foodorder.payment.model.Payment;
 import com.example.foodorder.payment.repository.PaymentRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.core.JmsTemplate;
@@ -11,6 +13,8 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class PaymentListener {
+
+    private static final Logger log = LoggerFactory.getLogger(PaymentListener.class);
 
     @Autowired
     private PaymentRepository paymentRepository;
@@ -39,7 +43,7 @@ public class PaymentListener {
             paymentRepository.save(payment);
 
             // Log format: [PaymentService] Order #123 - Payment SUCCESS (or FAILED)
-            System.out.println("[PaymentService] Order #" + orderId + " - Payment " + status);
+            log.info("[PaymentService] Order #{} - Payment {}", orderId, status);
 
             // Prepare response payload
             String responsePayload = String.format(
@@ -51,8 +55,7 @@ public class PaymentListener {
             jmsTemplate.convertAndSend("payment.response", responsePayload);
 
         } catch (Exception e) {
-            System.err.println("Error processing payment request: " + e.getMessage());
-            e.printStackTrace();
+            log.error("Error processing payment request", e);
         }
     }
 }

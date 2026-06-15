@@ -1,0 +1,43 @@
+name: online-food
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: online-food-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456789
+      MYSQL_DATABASE: food_order_db
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-p123456789"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  activemq:
+    # ActiveMQ Classic with OpenWire on 61616 and web console on 8161
+    image: apache/activemq-classic:6.1.2
+    container_name: online-food-activemq
+    ports:
+      - "61616:61616"
+      - "8161:8161"
+    healthcheck:
+      test: ["CMD", "sh", "-lc", "nc -z 127.0.0.1 61616"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  camunda:
+    # Optional: standalone Camunda for demoing workflow UI separately.
+    # Note: the current project embeds Camunda inside order-service (http://localhost:8081/camunda).
+    image: camunda/camunda-bpm-platform:run-7.21.0
+    container_name: online-food-camunda
+    ports:
+      - "8080:8080"
+
+volumes:
+  mysql_data:
+
